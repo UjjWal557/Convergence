@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 900px; margin: 0 auto;">
+    <h2 style="font-size: 1.8rem; margin-bottom: 8px;">Job Role Management</h2>
+    <p style="color: var(--text-muted); margin-bottom: 32px;">Define new job roles and their required skill proficiencies.</p>
+
+    <form action="/add-role" method="post">
+        <div class="form-group">
+            <label for="role_name">Role Title</label>
+            <input type="text" id="role_name" name="name" placeholder="e.g. Senior Backend Engineer" required>
+        </div>
+
+        <div class="form-group">
+            <label for="role_desc">Role Description</label>
+            <textarea id="role_desc" name="description" rows="3" placeholder="Briefly describe the responsibilities of this role..." required></textarea>
+        </div>
+
+        <h3 style="font-size: 1rem; color: var(--text-main); margin: 32px 0 16px;">Required Skills & Levels</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px;">Assign a proficiency level (1-4) to each core skill for this role.</p>
+
+        <div class="skills-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px;">
+            {% for skill_id, skill_info in taxonomy.items() %}
+            <div style="background-color: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 8px;">{{ skill_info.name }}</label>
+                <select name="skill_{{ skill_id }}" style="padding: 4px; font-size: 0.8rem; width: 100%;">
+                    <option value="0">Not Required</option>
+                    <option value="1">1 - Beginner</option>
+                    <option value="2">2 - Intermediate</option>
+                    <option value="3">3 - Advanced</option>
+                    <option value="4">4 - Expert</option>
+                </select>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; font-size: 1.1rem; padding: 16px;">
+            <i class="fas fa-plus-circle"></i> Create Job Role
+        </button>
+    </form>
+</div>
+
+<div class="card" style="max-width: 900px; margin: 32px auto;">
+    <h3 style="margin-bottom: 24px;">Current System Roles</h3>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+        {% for role_id, role in all_roles.items() %}
+        <div style="padding: 16px; border: 1px solid var(--border-color); border-radius: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <h4 style="font-size: 1rem; color: var(--text-main);">{{ role.name }}</h4>
+                <span style="font-size: 0.7rem; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 600;">{{ role.skills | length }} Skills</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">{{ role.description | truncate(80) }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

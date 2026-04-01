@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto; padding: 48px; text-align: center;">
+    <h2 style="font-size: 2rem; margin-bottom: 16px;">Resume Analysis Ingestion</h2>
+    <p style="color: var(--text-muted); margin-bottom: 40px;">Select a target role and upload a resume for precision matching.</p>
+
+    <form action="/analyze" method="post" enctype="multipart/form-data">
+        <div class="form-group" style="text-align: left;">
+            <label for="role">Select Target Job Role</label>
+            <select name="role_id" id="role" style="padding: 12px;">
+                {% for role_id, role in roles.items() %}
+                <option value="{{ role_id }}">{{ role.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="upload-zone" id="drop-zone" style="border: 2px dashed var(--border-color); border-radius: 12px; padding: 64px 32px; background-color: #f8fafc; margin-bottom: 32px; cursor: pointer; transition: all 0.2s;">
+            <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 16px;"></i>
+            <h3 style="color: var(--text-main); margin-bottom: 8px;">Drag & drop resume folder or files</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Limit 200MB per file • PDF, DOCX, TXT</p>
+            <input type="file" name="file" id="file-input" style="display: none;">
+            <button type="button" class="btn-primary" style="margin-top: 24px; background-color: #ffffff; color: var(--text-main); border: 1px solid var(--border-color);">Browse files</button>
+        </div>
+
+        <div id="file-info" style="margin-bottom: 24px; font-weight: 500; display: none;">
+            <i class="fas fa-file-alt" style="margin-right: 8px; color: var(--accent-blue);"></i> <span id="filename"></span>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; font-size: 1.1rem; padding: 16px; background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);">🚀 Run Analysis</button>
+    </form>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const fileInfo = document.getElementById('file-info');
+    const filenameSpan = document.getElementById('filename');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--accent-blue)';
+        dropZone.style.backgroundColor = '#eff6ff';
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = 'var(--border-color)';
+        dropZone.style.backgroundColor = '#f8fafc';
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--border-color)';
+        dropZone.style.backgroundColor = '#f8fafc';
+        
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileInfo();
+        }
+    });
+
+    fileInput.addEventListener('change', updateFileInfo);
+
+    function updateFileInfo() {
+        if (fileInput.files.length) {
+            filenameSpan.textContent = fileInput.files[0].name;
+            fileInfo.style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

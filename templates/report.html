@@ -1,0 +1,153 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="report-header"
+    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
+    <div>
+        <h1 style="font-size: 2.2rem; font-weight: 700;">{{ report.filename }}</h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">{{ report.role_name }} Candidate</p>
+
+        <div class="skill-tags" style="margin-top: 16px; display: flex; gap: 8px;">
+            {% for skill in report.matched_skills[:8] %}
+            <span
+                style="background-color: #f1f5f9; padding: 6px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">{{
+                skill.skill }}</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card" style="width: 200px; text-align: center; padding: 20px;">
+        <h3 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #1e40af;">Match Score</h3>
+        <div class="gauge-container">
+            <canvas id="matchGauge" width="140" height="140"></canvas>
+            <div class="gauge-txt">
+                <div class="score" style="color: #10b981;">{{ report.readiness_score }}%</div>
+            </div>
+        </div>
+        <p style="color: var(--success); font-weight: 600; font-size: 0.75rem; margin-top: 8px;">
+            <i class="fas fa-chart-line"></i> Average Match
+        </p>
+    </div>
+</div>
+
+<div class="report-layout">
+    <div class="main-column">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                <h3 style="font-size: 1.1rem; color: var(--text-main); font-weight: 700;">Skill Competency Matrix</h3>
+                <a href="/gap-analysis/{{ report_id }}"
+                    style="color: var(--accent-blue); text-decoration: none; font-size: 0.8rem; font-weight: 600;">View
+                    Detailed Log <i class="fas fa-external-link-alt"></i></a>
+            </div>
+
+            <div class="skill-matrix">
+                {% for skill in report.skill_radar_data %}
+                <div class="skill-row">
+                    <div class="skill-header">
+                        <span>{{ skill.Skill | upper }}</span>
+                        <span>{{ (skill.Actual / 4 * 100) | round | int }}%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill"
+                            style="width: {{ (skill.Actual / 4 * 100) }}%; background-color: {% if skill.Actual >= skill.Required %}#10b981{% elif skill.Actual > 0 %}#f59e0b{% else %}#ef4444{% endif %};">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="side-column">
+        <div class="card role-req-card">
+            <h3 style="color: white; font-size: 1rem; font-weight: 700; margin-bottom: 24px;">
+                <i class="far fa-check-square"></i> Role Requirements Map
+            </h3>
+
+            <div class="req-list">
+                {% for skill in report.missing_skills %}
+                <div class="req-item" style="border-color: rgba(255, 255, 255, 0.1);">
+                    <div style="display: flex; align-items: center;">
+                        <i class="far fa-circle-xmark" style="margin-right: 12px; color: #94a3b8;"></i>
+                        <span>{{ skill.skill }}</span>
+                    </div>
+                    <span style="color: #94a3b8; font-size: 0.75rem;">Missing</span>
+                </div>
+                {% endfor %}
+                {% for skill in report.matched_skills %}
+                <div class="req-item" style="border-color: rgba(255, 255, 255, 0.1);">
+                    <div style="display: flex; align-items: center;">
+                        <i class="far fa-circle-check" style="margin-right: 12px; color: #10b981;"></i>
+                        <span>{{ skill.skill }}</span>
+                    </div>
+                    <span style="color: #10b981; font-size: 0.75rem;">Matched</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div style="margin-top: 32px; display: flex; gap: 8px;">
+                <button
+                    style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: white; color: #0f172a; font-weight: 600; font-size: 0.8rem;">
+                    <i class="fas fa-download"></i> Export PDF
+                </button>
+                <button
+                    style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: #075985; color: white; font-weight: 600; font-size: 0.8rem;">
+                    <i class="far fa-envelope"></i> Share
+                </button>
+            </div>
+        </div>
+
+        <div class="alt-roles">
+            <h3
+                style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 16px;">
+                Alternative Roles</h3>
+            <div class="alt-role-item">
+                <div style="display: flex; align-items: center;">
+                    <div
+                        style="background-color: #f1f5f9; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                        <i class="fas fa-briefcase" style="color: #94a3b8; font-size: 0.8rem;"></i>
+                    </div>
+                    <span style="font-size: 0.85rem; font-weight: 600;">Software Engineer</span>
+                </div>
+                <span class="match-pct" style="color: #10b981;">{{ (report.readiness_score * 0.9) | round | int }}%
+                    Match</span>
+            </div>
+            <div class="alt-role-item">
+                <div style="display: flex; align-items: center;">
+                    <div
+                        style="background-color: #f1f5f9; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                        <i class="fas fa-briefcase" style="color: #94a3b8; font-size: 0.8rem;"></i>
+                    </div>
+                    <span style="font-size: 0.85rem; font-weight: 600;">Full Stack Engineer</span>
+                </div>
+                <span class="match-pct" style="color: #f59e0b;">{{ (report.readiness_score * 0.7) | round | int }}%
+                    Match</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('matchGauge').getContext('2d');
+    const score = {{ report.readiness_score }};
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [score, 100 - score],
+                backgroundColor: ['#10b981', '#f1f5f9'],
+                borderWidth: 0,
+                circumference: 360,
+                rotation: 0,
+                cutout: '80%'
+            }]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } }
+        }
+    });
+</script>
+{% endblock %}

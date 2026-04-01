@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analyzer | AI Skill Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="brand">
+            <h2>Resume Analyzer</h2>
+            <span>Precision Curator</span>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/upload" class="nav-link {% if active_page == 'upload' %}active{% endif %}">
+                    <i class="fas fa-file-upload"></i> Resume Upload
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/reports" class="nav-link {% if active_page == 'reports' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i> Analysis Report
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/gap-analysis" class="nav-link {% if active_page == 'gap_analysis' %}active{% endif %}">
+                    <i class="fas fa-bullseye"></i> Gap Analysis
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/job-manager" class="nav-link {% if active_page == 'job_manager' %}active{% endif %}">
+                    <i class="fas fa-id-card"></i> Job Manager
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button class="new-analysis-btn" onclick="window.location.href='/upload'">New Analysis</button>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="top-header">
+            <div class="header-breadcrumb" style="font-weight: 500; font-size: 0.9rem; color: var(--text-muted);">
+                <span style="color: var(--accent-blue);">System</span> / {{ active_page | replace('_', ' ') | title }}
+            </div>
+            <div class="header-actions">
+                <i class="far fa-bell" style="margin-right: 20px; font-size: 1.2rem; color: #64748b;"></i>
+                <i class="fas fa-cog" style="margin-right: 20px; font-size: 1.2rem; color: #64748b;"></i>
+                <span style="font-weight: 600; color: #1e293b;">Resume Insights</span>
+                <img src="https://ui-avatars.com/api/?name=Alex+Sterling&background=0D8ABC&color=fff"
+                    style="width: 32px; border-radius: 4px; margin-left: 10px; vertical-align: middle;">
+            </div>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+
+</html>

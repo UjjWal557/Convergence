@@ -1,0 +1,243 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px; background: #f8fafc;">
+    <div style="width: 100%;">
+        <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">1. Select Job Role</label>
+        <select id="roleFilter" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 1rem; font-weight: 500;">
+            <option value="">-- All Roles --</option>
+            {% for role_id, role in all_roles.items() %}
+            <option value="{{ role_id }}" {% if report.role_id == role_id %}selected{% endif %}>{{ role.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div id="candidateExplorer" style="width: 100%; display: none;">
+        <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 12px;">2. Click a Candidate to View Report</label>
+        <div id="candidateList" style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <!-- Clickable names will be injected here -->
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2 style="font-size: 1.8rem; margin-bottom: 24px;">Skill Gap Analysis Dashboard</h2>
+    
+    <div class="dashboard-grid">
+        <div class="card" style="background: rgba(99, 102, 241, 0.05); border-color: rgba(99, 102, 241, 0.1);">
+            <h3 style="color: #6366f1;">Readiness Score</h3>
+            <div style="font-size: 2.2rem; font-weight: 800; color: #1e1b4b;">{{ report.readiness_score }}%</div>
+            <p style="color: #ef4444; font-size: 0.8rem; margin-top: 8px;">
+                <i class="fas fa-arrow-down"></i> -18% vs. Avg
+            </p>
+        </div>
+        <div class="card" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.1);">
+            <h3 style="color: #10b981;">Skills Matched</h3>
+            <div style="font-size: 2.2rem; font-weight: 800; color: #064e3b;">{{ report.matched_skills | length }}</div>
+            <p style="color: #10b981; font-size: 0.8rem; margin-top: 8px;">
+                <i class="fas fa-arrow-up"></i> of {{ (report.matched_skills | length) + (report.missing_skills | length) }} required
+            </p>
+        </div>
+        <div class="card" style="background: rgba(245, 158, 11, 0.05); border-color: rgba(245, 158, 11, 0.1);">
+            <h3 style="color: #f59e0b;">Total Gap Points</h3>
+            <div style="font-size: 2.2rem; font-weight: 800; color: #451a03;">{{ report.total_gap_points }}</div>
+            <p style="color: #f59e0b; font-size: 0.8rem; margin-top: 8px;">
+                Points to bridge for role
+            </p>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; margin-top: 40px;">
+        <div>
+            <h3 style="margin-bottom: 24px;">Skill Matrix Comparison</h3>
+            <canvas id="radarChart" style="max-height: 400px;"></canvas>
+        </div>
+        <div>
+            <h3 style="margin-bottom: 24px;">Skill Breakdown</h3>
+            <canvas id="pieChart" style="max-height: 350px; margin: 0 auto;"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 32px;">
+    <h2 style="font-size: 1.5rem; margin-bottom: 24px;">Detailed Gap Analysis</h2>
+    
+    <div style="margin-bottom: 32px;">
+        <h3 style="font-size: 1rem; color: var(--success); margin-bottom: 16px;">Matched Skills</h3>
+        {% for skill in report.matched_skills %}
+        <div style="margin-bottom: 12px; font-weight: 500;">
+            <i class="fas fa-check-circle" style="color: var(--success); margin-right: 8px;"></i>
+            {{ skill.skill }}: Level {{ skill.level }} (Required: {{ skill.req }})
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="margin-bottom: 32px;">
+        <h3 style="font-size: 1rem; color: var(--danger); margin-bottom: 16px;">Missing Skills</h3>
+        {% for skill in report.missing_skills %}
+        <div style="margin-bottom: 12px; font-weight: 500;">
+            <i class="fas fa-times-circle" style="color: var(--danger); margin-right: 8px;"></i>
+            {{ skill.skill }}: Level 0 (Required: {{ skill.req }})
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card" style="margin-top: 32px; border-left: 5px solid var(--accent-blue);">
+    <h2 style="font-size: 1.5rem; margin-bottom: 24px;"><i class="fas fa-link"></i> Personalized Learning Roadmap</h2>
+    
+    {% for phase in report.learning_path %}
+    <div style="background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 16px;">
+        <h3 style="font-size: 1.1rem; color: var(--text-main); margin-bottom: 12px;">📌 {{ phase.phase }} - {{ phase.duration }}</h3>
+        <p style="margin-bottom: 8px;"><strong>Focus:</strong> {{ phase.focus }}</p>
+        <p style="margin-bottom: 16px;"><strong>Skills to Learn:</strong> {{ phase.skills | join(', ') }}</p>
+        
+        {% if phase.resources %}
+        <p style="font-weight: 600; margin-bottom: 8px;">Recommended Resources:</p>
+        <ul style="list-style: none; padding-left: 0;">
+            {% for res in phase.resources %}
+            <li style="margin-bottom: 8px;">
+                <i class="fas fa-external-link-alt" style="font-size: 0.8rem; color: var(--accent-blue); margin-right: 8px;"></i>
+                <a href="{{ res.url }}" target="_blank" style="color: var(--accent-blue); text-decoration: none;">{{ res.name }}</a> ({{ res.type }})
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Robust data passing using | tojson | safe
+    const allReports = {{ all_reports | tojson | safe }};
+    const currentReportId = {{ report_id | tojson | safe }};
+    const skillRadarData = {{ report.skill_radar_data | tojson | safe }};
+    
+    const roleFilter = document.getElementById('roleFilter');
+    const candidateExplorer = document.getElementById('candidateExplorer');
+    const candidateList = document.getElementById('candidateList');
+
+    function updateCandidates() {
+        const selectedRole = roleFilter.value;
+        candidateList.innerHTML = '';
+        
+        if (!selectedRole) {
+            candidateExplorer.style.display = 'none';
+            return;
+        }
+
+        const filtered = allReports.filter(r => String(r.role_id) === String(selectedRole));
+        
+        if (filtered.length === 0) {
+            candidateList.innerHTML = '<p style="font-size: 0.9rem; color: var(--text-muted); padding: 10px;">No candidates found for this role.</p>';
+        } else {
+            filtered.forEach(r => {
+                const card = document.createElement('a');
+                card.href = `/gap-analysis/${r.id}`;
+                card.className = (Number(r.id) === Number(currentReportId)) ? 'candidate-pill active' : 'candidate-pill';
+                card.innerHTML = `
+                    <i class="fas fa-user-circle"></i>
+                    <span>${r.filename}</span>
+                `;
+                candidateList.appendChild(card);
+            });
+        }
+        
+        candidateExplorer.style.display = 'block';
+    }
+
+    roleFilter.addEventListener('change', updateCandidates);
+    
+    // Initial population
+    updateCandidates();
+
+    // Chart Data Preparation
+    const labels = skillRadarData.map(s => s.Skill);
+    const required = skillRadarData.map(s => s.Required);
+    const actual = skillRadarData.map(s => s.Actual);
+
+    // Radar Chart
+    new Chart(document.getElementById('radarChart'), {
+        type: 'radar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Required',
+                data: required,
+                fill: true,
+                backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                borderColor: 'rgb(99, 102, 241)',
+                pointBackgroundColor: 'rgb(99, 102, 241)',
+                pointBorderColor: '#fff'
+            }, {
+                label: 'Actual',
+                data: actual,
+                fill: true,
+                backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                borderColor: 'rgb(239, 68, 68)',
+                pointBackgroundColor: 'rgb(239, 68, 68)',
+                pointBorderColor: '#fff'
+            }]
+        },
+        options: {
+            scales: { r: { min: 0, max: 4, ticks: { display: false } } },
+            plugins: { legend: { position: 'top' } }
+        }
+    });
+
+    // Pie Chart
+    new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Matched', 'Missing'],
+            datasets: [{
+                data: [{{ report.matched_skills | length }}, {{ report.missing_skills | length }}],
+                backgroundColor: ['#10b981', '#ef4444']
+            }]
+        },
+        options: {
+            cutout: '60%',
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+</script>
+
+<style>
+.candidate-pill {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    text-decoration: none;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.candidate-pill i {
+    margin-right: 8px;
+    color: var(--text-muted);
+}
+
+.candidate-pill:hover {
+    border-color: var(--accent-blue);
+    background-color: #eff6ff;
+    transform: translateY(-2px);
+}
+
+.candidate-pill.active {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.candidate-pill.active i {
+    color: white;
+}
+</style>
+{% endblock %}

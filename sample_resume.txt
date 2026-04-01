@@ -1,0 +1,41 @@
+JOHN DOE
+Software Engineer | Data Enthusiast
+San Francisco, CA | john.doe@example.com | (123) 456-7890
+
+SUMMARY:
+Highly motivated software engineer with 2+ years of experience in full-stack development and data analysis. Passionate about machine learning and looking to transition into a Data Scientist role.
+
+TECHNICAL SKILLS:
+- Programming: Python (Expert), JavaScript (Advanced), SQL (Intermediate), HTML/CSS
+- Frameworks: React, Node.js, Flask, Django
+- Tools: Git, Docker, AWS, Jenkins
+- Data: Pandas, NumPy, Matplotlib, Excel
+
+EXPERIENCE:
+Full-Stack Developer | Tech Solutions Inc.
+Jan 2022 – Present
+- Developed and maintained web applications using React and Node.js.
+- Integrated RESTful APIs and optimized database queries using SQL.
+- Implemented CI/CD pipelines with Jenkins and Docker.
+- Collaborated with data teams to visualize project metrics using Pandas and Matplotlib.
+
+Junior Developer | WebMasters Corp.
+June 2020 – Dec 2021
+- Built responsive user interfaces using HTML/CSS and JavaScript.
+- Assisted in backend development with Python and Flask.
+- Managed source code versioning using Git.
+
+EDUCATION:
+Bachelor of Science in Computer Science
+University of California, Berkeley
+Graduated May 2020
+
+PROJECTS:
+Personal Finance Tracker: Built a web-based finance tracker using Python, Django, and React. Used Pandas for monthly expense analysis.
+Image Recognition App: Developed a basic image classifier using Python and TensorFlow (Beginner level).
+Portfolio Website: Designed and deployed a personal portfolio site using HTML/CSS and JavaScript on AWS.
+
+CERTIFICATIONS:
+- Python for Data Science (Coursera)
+- AWS Certified Cloud Practitioner
+- SQL Fundamentals (Udemy)
