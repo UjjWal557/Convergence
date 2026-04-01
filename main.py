@@ -283,5 +283,6 @@ if __name__ == "__main__":
     # mysql-connector 9.6 uses C extensions that crash inside asyncio.
     print("Initializing MySQL database...")
     database.init_db()
-    print("Starting server on http://localhost:8005")
-    uvicorn.run(app_root, host="0.0.0.0", port=8005)
+    print("Starting server on http://localhost:8000")
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app_root, host="0.0.0.0", port=port)

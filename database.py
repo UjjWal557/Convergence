@@ -1,12 +1,13 @@
 import mysql.connector
 import json
+import os
 
 # --- DATABASE CONFIGURATION ---
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'mysql',   # Update if your MySQL has a password
-    'database': 'resume_analyzer_app'
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'user': os.getenv('DB_USER', 'root'),
+    'password': os.getenv('DB_PASSWORD', 'mysql'),
+    'database': os.getenv('DB_NAME', 'resume_analyzer_app')
 }
 
 def get_connection():
