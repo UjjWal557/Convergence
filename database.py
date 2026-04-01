@@ -5,6 +5,7 @@ import os
 # --- DATABASE CONFIGURATION ---
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
+    'port': int(os.getenv('DB_PORT', 3306)),
     'user': os.getenv('DB_USER', 'root'),
     'password': os.getenv('DB_PASSWORD', 'mysql'),
     'database': os.getenv('DB_NAME', 'resume_analyzer_app')
@@ -15,6 +16,7 @@ def get_connection():
     try:
         conn = mysql.connector.connect(
             host=DB_CONFIG['host'],
+            port=DB_CONFIG['port'],
             user=DB_CONFIG['user'],
             password=DB_CONFIG['password'],
             database=DB_CONFIG['database']
@@ -31,6 +33,7 @@ def init_db():
         # Connect without specifying the database first
         conn = mysql.connector.connect(
             host=DB_CONFIG['host'],
+            port=DB_CONFIG['port'],
             user=DB_CONFIG['user'],
             password=DB_CONFIG['password']
         )
