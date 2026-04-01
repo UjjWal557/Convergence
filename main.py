@@ -13,6 +13,10 @@ import data
 import app
 import database
 
+# Initialize database tables as soon as the module is imported
+print("[DB] Initializing MySQL database...")
+database.init_db()
+
 app_root = FastAPI(debug=True)
 
 # Global config for Gemini
@@ -279,10 +283,6 @@ async def download_shortlisted():
 
 if __name__ == "__main__":
     import uvicorn
-    # Initialize DB synchronously BEFORE uvicorn starts its event loop.
-    # mysql-connector 9.6 uses C extensions that crash inside asyncio.
-    print("Initializing MySQL database...")
-    database.init_db()
+    # Local development run defaults to 8000
     print("Starting server on http://localhost:8000")
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app_root, host="0.0.0.0", port=port)
+    uvicorn.run(app_root, host="0.0.0.0", port=8000)
