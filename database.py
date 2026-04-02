@@ -14,7 +14,14 @@ DB_CONFIG = {
 
 SQLITE_DB_PATH = 'analyzer.db'
 
+
+def is_mysql_conn(conn):
+    """Checks if the connection is a MySQL connection."""
+    if not conn: return False
+    return "mysql" in type(conn).__module__.lower()
+
 def get_connection():
+
     """Returns a MySQL connection or falls back to SQLite if MySQL fails."""
     # Try MySQL first
     try:
@@ -25,16 +32,16 @@ def get_connection():
             password=DB_CONFIG['password'],
             database=DB_CONFIG['database']
         )
-        conn.is_mysql = True
         return conn
     except Exception as err:
+
         print(f"[DB] MySQL connection failed (using SQLite fallback): {err}")
         try:
             conn = sqlite3.connect(SQLITE_DB_PATH)
             conn.row_factory = sqlite3.Row # Make it return dict-like objects
-            conn.is_mysql = False
             return conn
         except Exception as sqlite_err:
+
             print(f"[DB] SQLite connection failed: {sqlite_err}")
             return None
 
@@ -48,7 +55,8 @@ def init_db():
 
     try:
         cursor = conn.cursor()
-        if conn.is_mysql:
+        is_mysql = is_mysql_conn(conn)
+        if is_mysql:
             # MySQL Initialization
             db = DB_CONFIG['database']
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{db}`")
@@ -98,7 +106,7 @@ def init_db():
         conn.commit()
         cursor.close()
         conn.close()
-        print(f"[DB] Database initialized OK (Type: {'MySQL' if conn.is_mysql else 'SQLite'}).")
+        print(f"[DB] Database initialized OK (Type: {'MySQL' if is_mysql else 'SQLite'}).")
     except Exception as err:
         print(f"[DB] init_db error: {err}")
 
@@ -110,8 +118,9 @@ def save_report(filename, role_id, readiness_score, analysis_dict):
         query = "INSERT INTO reports (filename, role_id, readiness_score, analysis_json) VALUES (%s, %s, %s, %s)"
         params = (filename, role_id, readiness_score, json.dumps(analysis_dict))
         
-        if not conn.is_mysql:
+        if not is_mysql_conn(conn):
             query = query.replace('%s', '?')
+
             
         cursor = conn.cursor()
         cursor.execute(query, params)
@@ -130,11 +139,12 @@ def get_reports():
     if not conn:
         return []
     try:
-        cursor = conn.cursor(dictionary=True) if conn.is_mysql else conn.cursor()
+        is_mysql = is_mysql_conn(conn)
+        cursor = conn.cursor(dictionary=True) if is_mysql else conn.cursor()
         cursor.execute("SELECT * FROM reports ORDER BY created_at DESC")
         rows = cursor.fetchall()
         
-        if not conn.is_mysql:
+        if not is_mysql:
             rows = [dict(r) for r in rows]
             
         cursor.close()
@@ -149,9 +159,10 @@ def get_report(report_id):
     if not conn:
         return None
     try:
+        is_mysql = is_mysql_conn(conn)
         query = "SELECT * FROM reports WHERE id = %s"
         params = (report_id,)
-        if not conn.is_mysql:
+        if not is_mysql:
             query = query.replace('%s', '?')
             cursor = conn.cursor()
         else:
@@ -160,7 +171,7 @@ def get_report(report_id):
         cursor.execute(query, params)
         row = cursor.fetchone()
         
-        if row and not conn.is_mysql:
+        if row and not is_mysql:
             row = dict(row)
             
         cursor.close()
@@ -176,7 +187,7 @@ def save_custom_role(role_id, name, description, skills):
         return
     try:
         cursor = conn.cursor()
-        if conn.is_mysql:
+        if is_mysql_conn(conn):
             cursor.execute("""
                 INSERT INTO custom_roles (id, name, description, skills_json)
                 VALUES (%s, %s, %s, %s)
@@ -206,14 +217,16 @@ def get_custom_roles():
     if not conn:
         return {}
     try:
-        cursor = conn.cursor(dictionary=True) if conn.is_mysql else conn.cursor()
+        is_mysql = is_mysql_conn(conn)
+        cursor = conn.cursor(dictionary=True) if is_mysql else conn.cursor()
         cursor.execute("SELECT * FROM custom_roles")
         rows = cursor.fetchall()
         
         roles = {}
         for row in rows:
-            if not conn.is_mysql:
+            if not is_mysql:
                 row = dict(row)
+
             raw = row['skills_json']
             skills = json.loads(raw) if isinstance(raw, str) else raw
             roles[row['id']] = {
