@@ -12,6 +12,15 @@ import io
 import data
 import app
 import database
+import nltk
+
+# Ensure NLTK data is available for the tokenizer
+try:
+    print("[NLTK] Downloading punkt...")
+    nltk.download('punkt', quiet=True)
+    nltk.download('punkt_tab', quiet=True)
+except Exception as e:
+    print(f"[NLTK] Download failed (might be offline): {e}")
 
 # Initialize database tables as soon as the module is imported
 print("[DB] Initializing MySQL database...")
