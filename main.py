@@ -153,7 +153,21 @@ async def analyze_resume(request: Request, role_id: str = Form(...), file: Uploa
         # Save to DB
         report_id = database.save_report(file.filename, role_id, analysis['readiness_score'], analysis)
         
+        if report_id is None:
+            return templates.TemplateResponse("error.html", {
+                "request": request,
+                "active_page": "upload",
+                "error_message": "Failed to save the analysis report. This usually indicates a database connection issue. However, our system has been updated to automatically use a local database fallback. Please try again."
+            })
+            
         return RedirectResponse(url=f"/report/{report_id}", status_code=303)
+    except Exception as e:
+        print(f"[Analyze Error] {e}")
+        return templates.TemplateResponse("error.html", {
+            "request": request,
+            "active_page": "upload",
+            "error_message": f"An error occurred during analysis: {str(e)}"
+        })
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
@@ -162,7 +176,11 @@ async def analyze_resume(request: Request, role_id: str = Form(...), file: Uploa
 async def view_report(request: Request, report_id: int):
     row = database.get_report(report_id)
     if not row:
-        return RedirectResponse(url="/")
+        return templates.TemplateResponse("error.html", {
+            "request": request,
+            "active_page": "reports",
+            "error_message": f"Report ID {report_id} not found in the database."
+        })
         
     report_data = parse_db_json(row['analysis_json'])
     all_roles = get_combined_roles()
